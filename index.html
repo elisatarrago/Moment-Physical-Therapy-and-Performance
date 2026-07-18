@@ -95,6 +95,15 @@
   }
   .chip:hover{background:var(--surface-2);}
   .chip.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .chip.loc-chip.loc-midtown{background:var(--loc-midtown-bg);color:var(--loc-midtown);border-color:transparent;}
+  .chip.loc-chip.loc-soho{background:var(--loc-soho-bg);color:var(--loc-soho);border-color:transparent;}
+  .chip.loc-chip.loc-lic{background:var(--loc-lic-bg);color:var(--loc-lic);border-color:transparent;}
+  .chip.loc-chip.loc-midtown:hover{background:var(--loc-midtown-bg);filter:brightness(0.96);}
+  .chip.loc-chip.loc-soho:hover{background:var(--loc-soho-bg);filter:brightness(0.96);}
+  .chip.loc-chip.loc-lic:hover{background:var(--loc-lic-bg);filter:brightness(0.96);}
+  .chip.loc-chip.loc-midtown.active{background:var(--loc-midtown);color:#fff;border-color:var(--loc-midtown);}
+  .chip.loc-chip.loc-soho.active{background:var(--loc-soho);color:#fff;border-color:var(--loc-soho);}
+  .chip.loc-chip.loc-lic.active{background:var(--loc-lic);color:#fff;border-color:var(--loc-lic);}
   .switch{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-soft);font-weight:600;cursor:pointer;user-select:none;}
   .switch input{width:15px;height:15px;}
   .search{border:1px solid var(--line-strong);border-radius:8px;padding:7px 11px;font-size:12.5px;min-width:200px;}
@@ -883,7 +892,7 @@ function renderCalendarFilters(){
   var allChip = chip("All locations", state.loc==="All", function(){ state.loc="All"; renderCalendar(); renderCalendarFilters(); });
   locF.appendChild(allChip);
   LOCATIONS.forEach(function(l){
-    locF.appendChild(chip(l.name, state.loc===l.id, function(){ state.loc=l.id; renderCalendar(); renderCalendarFilters(); }));
+    locF.appendChild(locChip(l, state.loc===l.id, function(){ state.loc=l.id; renderCalendar(); renderCalendarFilters(); }));
   });
   var provF = document.getElementById("provFilter");
   provF.innerHTML = "";
@@ -894,6 +903,11 @@ function renderCalendarFilters(){
 }
 function chip(label, active, onClick){
   var b=document.createElement("button"); b.className="chip"+(active?" active":""); b.textContent=label;
+  b.addEventListener("click", onClick);
+  return b;
+}
+function locChip(loc, active, onClick){
+  var b=document.createElement("button"); b.className="chip loc-chip loc-"+loc.id+(active?" active":""); b.textContent=loc.name;
   b.addEventListener("click", onClick);
   return b;
 }
@@ -1035,7 +1049,7 @@ function renderPatientFilters(){
   f.innerHTML = "";
   f.appendChild(chip("All locations", state.patLoc==="All", function(){ state.patLoc="All"; renderPatients(); renderPatientFilters(); }));
   LOCATIONS.forEach(function(l){
-    f.appendChild(chip(l.name, state.patLoc===l.id, function(){ state.patLoc=l.id; renderPatients(); renderPatientFilters(); }));
+    f.appendChild(locChip(l, state.patLoc===l.id, function(){ state.patLoc=l.id; renderPatients(); renderPatientFilters(); }));
   });
 }
 
