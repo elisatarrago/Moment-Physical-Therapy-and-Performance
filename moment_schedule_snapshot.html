@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moment PT · PracticeQ</title>
+<style>
+  :root{
+    --bg:#f5f6f8;
+    --panel:#ffffff;
+    --ink:#1f2733;
+    --ink-soft:#5b6675;
+    --ink-faint:#8a94a4;
+    --line:#e3e7ed;
+    --line-strong:#d3d9e2;
+    --brand:#2f5d8a;
+    --brand-soft:#eaf1f8;
+    --mid:#2f6fb0;   --mid-bg:#e9f1fa;
+    --soho:#1f8a80;  --soho-bg:#e6f5f2;
+    --lic:#b6791f;   --lic-bg:#faf1e0;
+    --pto:#8a94a4;   --pto-bg:#eef0f3;
+    --shadow:0 1px 2px rgba(20,30,45,.06),0 2px 8px rgba(20,30,45,.05);
+    --radius:8px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:14px;
+    line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* ---------- top bar ---------- */
+  .topbar{
+    background:var(--panel);
+    border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:20px;
+    padding:0 20px;height:56px;position:sticky;top:0;z-index:20;
+  }
+  .logo{display:flex;align-items:center;gap:9px;font-weight:700;letter-spacing:.2px;}
+  .logo .mark{
+    width:26px;height:26px;border-radius:6px;background:var(--brand);
+    color:#fff;display:grid;place-items:center;font-weight:800;font-size:14px;
+  }
+  .logo .sub{color:var(--ink-faint);font-weight:600;font-size:12px;border-left:1px solid var(--line);padding-left:9px;}
+  .topnav{display:flex;gap:2px;margin-left:8px;}
+  .topnav button{
+    background:none;border:0;color:var(--ink-soft);font:inherit;font-weight:600;
+    padding:8px 12px;border-radius:6px;cursor:pointer;
+  }
+  .topnav button:hover{background:var(--bg);}
+  .topnav button.active{background:var(--brand-soft);color:var(--brand);}
+  .topnav button.disabled{color:var(--ink-faint);cursor:not-allowed;}
+  .topright{margin-left:auto;display:flex;align-items:center;gap:14px;color:var(--ink-soft);font-size:12px;}
+  .today-pill{background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-weight:600;color:var(--ink-soft);}
+  .avatar{width:30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:12px;}
+
+  /* ---------- toolbar ---------- */
+  .toolbar{
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    padding:16px 24px 6px;
+  }
+  .weeknav{display:flex;align-items:center;gap:6px;}
+  .weeknav .arrow{
+    width:30px;height:30px;border:1px solid var(--line-strong);background:var(--panel);
+    border-radius:6px;color:var(--ink-soft);cursor:pointer;font-size:15px;display:grid;place-items:center;
+  }
+  .weeknav .arrow:hover{background:var(--bg);}
+  .weeklabel{font-weight:700;font-size:16px;padding:0 6px;}
+  .filters{display:flex;gap:6px;margin-left:6px;}
+  .filters button{
+    border:1px solid var(--line-strong);background:var(--panel);color:var(--ink-soft);
+    font:inherit;font-weight:600;padding:6px 13px;border-radius:999px;cursor:pointer;
+  }
+  .filters button:hover{background:var(--bg);}
+  .filters button.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .legend{margin-left:auto;display:flex;gap:14px;align-items:center;font-size:12px;color:var(--ink-soft);}
+  .legend .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle;}
+
+  .wrap{padding:8px 24px 40px;}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  /* ---------- calendar ---------- */
+  .cal{
+    display:grid;grid-template-columns:repeat(5,1fr);gap:12px;
+    background:transparent;
+  }
+  .day{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    min-height:220px;display:flex;flex-direction:column;box-shadow:var(--shadow);
+  }
+  .day h3{
+    margin:0;padding:11px 12px;border-bottom:1px solid var(--line);
+    font-size:12px;letter-spacing:.4px;text-transform:uppercase;color:var(--ink-soft);
+    display:flex;justify-content:space-between;align-items:baseline;
+  }
+  .day h3 .date{color:var(--ink-faint);font-weight:600;letter-spacing:0;text-transform:none;}
+  .day .slots{padding:8px;display:flex;flex-direction:column;gap:7px;flex:1;}
+  .empty-day{color:var(--ink-faint);font-size:12px;font-style:italic;padding:14px 6px;text-align:center;}
+
+  .appt{
+    border:1px solid var(--line);border-left:3px solid var(--ink-faint);
+    border-radius:6px;padding:7px 9px;cursor:pointer;background:#fff;
+    transition:box-shadow .12s ease,transform .12s ease;
+  }
+  .appt:hover{box-shadow:var(--shadow);transform:translateY(-1px);}
+  .appt .t{font-size:11px;font-weight:700;color:var(--ink-soft);}
+  .appt .p{font-weight:600;margin-top:1px;}
+  .appt .meta{font-size:11px;color:var(--ink-soft);margin-top:2px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+  .appt.loc-Midtown{border-left-color:var(--mid);}       .appt.loc-Midtown .tag{background:var(--mid-bg);color:var(--mid);}
+  .appt.loc-Soho{border-left-color:var(--soho);}          .appt.loc-Soho .tag{background:var(--soho-bg);color:var(--soho);}
+  .appt.loc-LIC{border-left-color:var(--lic);}            .appt.loc-LIC .tag{background:var(--lic-bg);color:var(--lic);}
+  .tag{font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;letter-spacing:.2px;}
+
+  .pto{
+    border:1px dashed var(--line-strong);border-radius:6px;background:var(--pto-bg);
+    color:var(--pto);font-size:11px;font-weight:600;padding:6px 9px;text-align:center;
+  }
+
+  /* ---------- patients table ---------- */
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+  table{width:100%;border-collapse:collapse;}
+  thead th{
+    text-align:left;font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:var(--ink-faint);
+    padding:12px 14px;border-bottom:1px solid var(--line);background:#fbfcfd;font-weight:700;
+  }
+  tbody td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:middle;}
+  tbody tr{cursor:pointer;}
+  tbody tr:hover{background:#f8fafc;}
+  tbody tr:last-child td{border-bottom:0;}
+  .pname{font-weight:600;}
+  .muted{color:var(--ink-soft);}
+  .faint{color:var(--ink-faint);}
+  .sess{font-variant-numeric:tabular-nums;font-weight:600;}
+  .none{color:var(--ink-faint);font-style:italic;}
+  .status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:middle;background:var(--ink-faint);}
+  .st-Completed{background:#3a9a6b;} .st-No-Show{background:#c25b4a;} .st-Cancelled{background:#b6791f;}
+
+  /* ---------- roster ---------- */
+  .roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+  .rcard{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;}
+  .rcard .rhead{display:flex;align-items:center;gap:11px;margin-bottom:12px;}
+  .rcard .rav{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px;}
+  .rcard .rname{font-weight:700;}
+  .rcard .rrole{font-size:12px;color:var(--ink-soft);}
+  .rrow{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-top:1px solid var(--line);}
+  .rrow .k{color:var(--ink-soft);}
+  .rrow .v{font-weight:600;text-align:right;}
+  .rrow .v.pto{color:var(--lic);}
+
+  .section-note{color:var(--ink-soft);font-size:13px;margin:2px 0 14px;}
+
+  /* ---------- modal ---------- */
+  .overlay{
+    position:fixed;inset:0;background:rgba(23,31,43,.42);display:none;
+    align-items:center;justify-content:center;z-index:50;padding:20px;
+  }
+  .overlay.open{display:flex;}
+  .modal{
+    background:var(--panel);border-radius:12px;max-width:460px;width:100%;
+    box-shadow:0 12px 40px rgba(20,30,45,.28);overflow:hidden;
+    animation:pop .14s ease;
+  }
+  @keyframes pop{from{transform:translateY(6px);opacity:.7;}to{transform:none;opacity:1;}}
+  .modal .mhead{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .modal .mtitle{font-weight:700;font-size:16px;}
+  .modal .mclose{background:none;border:0;font-size:20px;color:var(--ink-faint);cursor:pointer;line-height:1;padding:2px 4px;}
+  .modal .mbody{padding:16px 18px;}
+  .drow{display:flex;justify-content:space-between;gap:16px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;}
+  .drow:last-child{border-bottom:0;}
+  .drow .k{color:var(--ink-soft);}
+  .drow .v{font-weight:600;text-align:right;}
+  .mbody h4{margin:16px 0 6px;font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:var(--ink-faint);}
+  .hist{font-size:13px;}
+  .hist .h{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);}
+  .hist .h:last-child{border-bottom:0;}
+
+  @media (max-width:1000px){
+    .cal{grid-template-columns:repeat(2,1fr);}
+    .legend{display:none;}
+  }
+  @media (max-width:620px){
+    .cal{grid-template-columns:1fr;}
+    .topnav{display:none;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .appt,.modal{transition:none;animation:none;}
+  }
+  :focus-visible{outline:2px solid var(--brand);outline-offset:2px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <span class="mark">M</span>
+    Moment PT
+    <span class="sub">PracticeQ</span>
+  </div>
+  <div class="topnav">
+    <button class="tabbtn active" data-view="calendar">Calendar</button>
+    <button class="tabbtn" data-view="patients">Patients</button>
+    <button class="tabbtn" data-view="roster">Team &amp; Availability</button>
+  </div>
+  <div class="topright">
+    <span class="today-pill">Today: Friday, July 17, 2026</span>
+    <span class="avatar">OM</span>
+  </div>
+</div>
+
+<div class="toolbar">
+  <div class="weeknav">
+    <button class="arrow" title="Previous week" aria-label="Previous week">‹</button>
+    <span class="weeklabel">Week of July 20 to 24, 2026</span>
+    <button class="arrow" title="Next week" aria-label="Next week">›</button>
+  </div>
+  <div class="filters" id="filters">
+    <button class="active" data-loc="All">All locations</button>
+    <button data-loc="Midtown">Midtown</button>
+    <button data-loc="Soho">Soho</button>
+    <button data-loc="LIC">LIC</button>
+  </div>
+  <div class="filters" id="thfilters">
+    <button class="active" data-th="All">All providers</button>
+    <button data-th="kendo">Kendo</button>
+    <button data-th="priya">Priya</button>
+    <button data-th="amelia">Amelia</button>
+    <button data-th="diego">Diego</button>
+    <button data-th="marcus">Owen</button>
+    <button data-th="hannah">Hannah</button>
+  </div>
+  <div class="legend">
+    <span><span class="dot" style="background:var(--mid)"></span>Midtown</span>
+    <span><span class="dot" style="background:var(--soho)"></span>Soho</span>
+    <span><span class="dot" style="background:var(--lic)"></span>LIC</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="view active" id="view-calendar">
+    <div class="cal" id="calGrid"></div>
+  </div>
+
+  <div class="view" id="view-patients">
+    <p class="section-note">Active patients across all locations. Click a patient to see their visit history and plan details.</p>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Patient</th><th>Location</th><th>Plan of care</th><th>Sessions</th><th>Last visit</th><th>Next appointment</th>
+          </tr>
+        </thead>
+        <tbody id="patientRows"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="view" id="view-roster">
+    <p class="section-note">Therapist assignments and time off for the week of July 20 to 24, 2026. Providers work across all locations.</p>
+    <div class="roster" id="rosterGrid"></div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="mhead">
+      <div class="mtitle" id="mTitle"></div>
+      <button class="mclose" id="mClose" aria-label="Close">×</button>
+    </div>
+    <div class="mbody" id="mBody"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   MOMENT PT: SCHEDULE SNAPSHOT DATA
+   Week under review: Mon July 20 to Fri July 24, 2026
+   ============================================================ */
+
+var DAYS = [
+  {key:"Mon", label:"Monday",    date:"July 20"},
+  {key:"Tue", label:"Tuesday",   date:"July 21"},
+  {key:"Wed", label:"Wednesday", date:"July 22"},
+  {key:"Thu", label:"Thursday",  date:"July 23"},
+  {key:"Fri", label:"Friday",    date:"July 24"}
+];
+
+var THERAPISTS = [
+  {id:"kendo",  name:"Kendo Nakamura", status:"Full-time", days:"Mon to Fri", pto:"", color:"#2f6fb0"},
+  {id:"priya",  name:"Priya Shah",     status:"Part-time", days:"Mon to Thu", pto:"", color:"#2f6fb0"},
+  {id:"amelia", name:"Amelia Ruiz",    status:"Full-time", days:"Mon to Fri", pto:"", color:"#2f6fb0"},
+  {id:"diego",  name:"Diego Álvarez",  status:"Full-time", days:"Mon to Fri", pto:"", color:"#2f6fb0"},
+  {id:"marcus", name:"Owen Marsh",     status:"Full-time", days:"Mon to Fri", pto:"", color:"#2f6fb0"},
+  {id:"hannah", name:"Hannah Cole",    status:"Full-time", days:"Mon to Fri", pto:"Out (PTO) Thu July 23 to Fri July 24", color:"#2f6fb0"}
+];
+var THMAP = {}; THERAPISTS.forEach(function(t){THMAP[t.id]=t;});
+
+/* Appointments for the week. time in "H:MM" 24h-ish stored as minutes for sorting. */
+function mins(h,m){return h*60+(m||0);}
+
+var APPTS = [
+  /* ---------------- MONDAY ---------------- */
+  {id:"a01", day:"Mon", start:mins(8,0),  dur:60, patient:"Ava Coleman",     th:"kendo",  loc:"Midtown", type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 5 of 12"},
+  {id:"a02", day:"Mon", start:mins(9,0),  dur:30, patient:"Ethan Brooks",    th:"kendo",  loc:"Midtown", type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 8 of 12"},
+  {id:"a03", day:"Mon", start:mins(10,0), dur:60, patient:"Maria Santos",    th:"priya",  loc:"Midtown", type:"Post-Op Rehab",      pkg:"Post-Op Rehab (20), session 9 of 20"},
+  {id:"a04", day:"Mon", start:mins(11,0), dur:30, patient:"James Ford",      th:"priya",  loc:"Midtown", type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 3 of 12"},
+  {id:"a05", day:"Mon", start:mins(9,0),  dur:60, patient:"Sofia Marino",    th:"marcus", loc:"LIC",     type:"Initial Evaluation", pkg:"Not linked (new patient)"},
+  {id:"a06", day:"Mon", start:mins(9,30), dur:30, patient:"Leo Martin",      th:"marcus", loc:"LIC",     type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 7 of 12"},
+  {id:"a07", day:"Mon", start:mins(11,0), dur:30, patient:"Grace Kim",       th:"hannah", loc:"LIC",     type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 6 of 12"},
+  {id:"a08", day:"Mon", start:mins(8,30), dur:60, patient:"Daniel Cho",      th:"amelia", loc:"Soho",    type:"Post-Op Rehab",      pkg:"Post-Op Rehab (20), session 12 of 20"},
+  {id:"a09", day:"Mon", start:mins(10,0), dur:30, patient:"Rachel Green",    th:"amelia", loc:"Soho",    type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 4 of 12"},
+  {id:"a10", day:"Mon", start:mins(13,0), dur:60, patient:"Peter Novak",     th:"diego",  loc:"Soho",    type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 2 of 12"},
+  {id:"a11", day:"Mon", start:mins(14,30),dur:30, patient:"Ava Coleman",     th:"kendo",  loc:"Midtown", type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 6 of 12"},
+
+  /* ---------------- TUESDAY ---------------- */
+  {id:"b01", day:"Tue", start:mins(8,30), dur:30, patient:"Ethan Brooks",    th:"kendo",  loc:"Midtown", type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 9 of 12"},
+  {id:"b02", day:"Tue", start:mins(10,0), dur:30, patient:"Grace Lin",       th:"kendo",  loc:"Midtown", type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 5 of 12"},
+  {id:"b03", day:"Tue", start:mins(10,0), dur:30, patient:"Robert Ellison",  th:"kendo",  loc:"Midtown", type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 7 of 12"},
+  {id:"b04", day:"Tue", start:mins(11,30),dur:60, patient:"Maria Santos",    th:"priya",  loc:"Midtown", type:"Post-Op Rehab",      pkg:"Post-Op Rehab (20), session 10 of 20"},
+  {id:"b05", day:"Tue", start:mins(9,0),  dur:60, patient:"Daniel Cho",      th:"amelia", loc:"Soho",    type:"Post-Op Rehab",      pkg:"Post-Op Rehab (20), session 13 of 20"},
+  {id:"b06", day:"Tue", start:mins(11,0), dur:30, patient:"Rachel Green",    th:"amelia", loc:"Soho",    type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 5 of 12"},
+  {id:"b07", day:"Tue", start:mins(13,30),dur:30, patient:"Peter Novak",     th:"diego",  loc:"Soho",    type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 3 of 12"},
+  {id:"b08", day:"Tue", start:mins(15,0), dur:60, patient:"Hana Yoshida",    th:"diego",  loc:"Soho",    type:"Initial Evaluation", pkg:"Not linked (new patient)"},
+  {id:"b09", day:"Tue", start:mins(9,30), dur:30, patient:"Leo Martin",      th:"marcus", loc:"LIC",     type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 8 of 12"},
+  {id:"b10", day:"Tue", start:mins(11,0), dur:30, patient:"Grace Kim",       th:"hannah", loc:"LIC",     type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 7 of 12"},
+  {id:"b11", day:"Tue", start:mins(14,0), dur:30, patient:"Omar Haddad",     th:"marcus", loc:"LIC",     type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 4 of 12"},
+
+  /* ---------------- WEDNESDAY ---------------- */
+  {id:"c01", day:"Wed", start:mins(8,0),  dur:60, patient:"Ava Coleman",     th:"kendo",  loc:"Midtown", type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 7 of 12"},
+  {id:"c02", day:"Wed", start:mins(9,30), dur:30, patient:"James Ford",      th:"kendo",  loc:"Midtown", type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 4 of 12"},
+  {id:"c03", day:"Wed", start:mins(10,30),dur:60, patient:"Maria Santos",    th:"priya",  loc:"Midtown", type:"Post-Op Rehab",      pkg:"Post-Op Rehab (20), session 11 of 20"},
+  {id:"c04", day:"Wed", start:mins(13,0), dur:30, patient:"Ethan Brooks",    th:"priya",  loc:"Midtown", type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 10 of 12"},
+  {id:"c05", day:"Wed", start:mins(8,30), dur:60, patient:"Daniel Cho",      th:"amelia", loc:"Soho",    type:"Post-Op Rehab",      pkg:"Post-Op Rehab (20), session 14 of 20"},
+  {id:"c06", day:"Wed", start:mins(10,0), dur:30, patient:"Rachel Green",    th:"amelia", loc:"Soho",    type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 6 of 12"},
+  {id:"c07", day:"Wed", start:mins(11,30),dur:30, patient:"Hana Yoshida",    th:"amelia", loc:"Soho",    type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 1 of 12"},
+  {id:"c08", day:"Wed", start:mins(13,0), dur:30, patient:"Peter Novak",     th:"diego",  loc:"Soho",    type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 4 of 12"},
+  {id:"c09", day:"Wed", start:mins(14,0), dur:60, patient:"Sandra Willis",   th:"diego",  loc:"Soho",    type:"Post-Op Rehab",      pkg:"Post-Op Rehab (20), session 6 of 20"},
+  {id:"c10", day:"Wed", start:mins(10,0), dur:30, patient:"Omar Haddad",     th:"marcus", loc:"LIC",     type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 5 of 12"},
+  {id:"c11", day:"Wed", start:mins(15,0), dur:30, patient:"Leo Martin",      th:"marcus", loc:"LIC",     type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 9 of 12"},
+  {id:"c12", day:"Wed", start:mins(12,0), dur:60, patient:"Julian Meyer",    th:"amelia", loc:"Soho",    type:"Post-Op Rehab",      pkg:"Post-Op Rehab (20), session 5 of 20"},
+  {id:"c13", day:"Wed", start:mins(13,0), dur:30, patient:"Camille Rocha",   th:"amelia", loc:"Soho",    type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 4 of 12"},
+
+  /* ---------------- THURSDAY ---------------- */
+  {id:"d01", day:"Thu", start:mins(8,30), dur:30, patient:"Ethan Brooks",    th:"kendo",  loc:"Midtown", type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 11 of 12"},
+  {id:"d02", day:"Thu", start:mins(9,30), dur:60, patient:"Maria Santos",    th:"kendo",  loc:"Midtown", type:"Post-Op Rehab",      pkg:"Post-Op Rehab (20), session 12 of 20"},
+  {id:"d03", day:"Thu", start:mins(11,0), dur:60, patient:"Nathan Powell",   th:"diego",  loc:"Midtown", type:"Initial Evaluation", pkg:"Not linked (new patient)"},
+  {id:"d04", day:"Thu", start:mins(13,30),dur:30, patient:"James Ford",      th:"kendo",  loc:"Midtown", type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 5 of 12"},
+  {id:"d05", day:"Thu", start:mins(9,0),  dur:60, patient:"Daniel Cho",      th:"amelia", loc:"Soho",    type:"Post-Op Rehab",      pkg:"Post-Op Rehab (20), session 15 of 20"},
+  {id:"d06", day:"Thu", start:mins(10,30),dur:30, patient:"Rachel Green",    th:"amelia", loc:"Soho",    type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 7 of 12"},
+  {id:"d07", day:"Thu", start:mins(12,0), dur:30, patient:"Hana Yoshida",    th:"amelia", loc:"Soho",    type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 2 of 12"},
+  {id:"d08", day:"Thu", start:mins(14,0), dur:60, patient:"Sandra Willis",   th:"diego",  loc:"Soho",    type:"Post-Op Rehab",      pkg:"Post-Op Rehab (20), session 7 of 20"},
+  {id:"d09", day:"Thu", start:mins(9,30), dur:30, patient:"Grace Kim",       th:"marcus", loc:"LIC",     type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 8 of 12"},
+  {id:"d10", day:"Thu", start:mins(11,0), dur:30, patient:"Omar Haddad",     th:"marcus", loc:"LIC",     type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 6 of 12"},
+
+  /* ---------------- FRIDAY ---------------- */
+  {id:"e01", day:"Fri", start:mins(8,0),  dur:60, patient:"Ava Coleman",     th:"kendo",  loc:"Midtown", type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 8 of 12"},
+  {id:"e02", day:"Fri", start:mins(9,30), dur:30, patient:"Ethan Brooks",    th:"kendo",  loc:"Midtown", type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 12 of 12"},
+  {id:"e03", day:"Fri", start:mins(11,0), dur:60, patient:"Maria Santos",    th:"kendo",  loc:"Midtown", type:"Post-Op Rehab",      pkg:"Post-Op Rehab (20), session 13 of 20"},
+  {id:"e04", day:"Fri", start:mins(8,30), dur:60, patient:"Daniel Cho",      th:"amelia", loc:"Soho",    type:"Post-Op Rehab",      pkg:"Post-Op Rehab (20), session 16 of 20"},
+  {id:"e05", day:"Fri", start:mins(10,0), dur:30, patient:"Rachel Green",    th:"amelia", loc:"Soho",    type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 8 of 12"},
+  {id:"e06", day:"Fri", start:mins(11,0), dur:30, patient:"Peter Novak",     th:"diego",  loc:"Soho",    type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 5 of 12"},
+  {id:"e07", day:"Fri", start:mins(13,0), dur:60, patient:"Sandra Willis",   th:"diego",  loc:"Soho",    type:"Post-Op Rehab",      pkg:"Post-Op Rehab (20), session 8 of 20"},
+  {id:"e08", day:"Fri", start:mins(9,0),  dur:30, patient:"Grace Kim",       th:"hannah", loc:"LIC",     type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 9 of 12"},
+  {id:"e09", day:"Fri", start:mins(10,0), dur:30, patient:"Leo Martin",      th:"hannah", loc:"LIC",     type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 10 of 12"},
+  {id:"e10", day:"Fri", start:mins(11,0), dur:30, patient:"Omar Haddad",     th:"hannah", loc:"LIC",     type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 7 of 12"},
+  {id:"e11", day:"Fri", start:mins(11,30),dur:60, patient:"Julian Meyer",    th:"amelia", loc:"Soho",    type:"Post-Op Rehab",      pkg:"Post-Op Rehab (20), session 6 of 20"},
+  {id:"e12", day:"Fri", start:mins(12,30),dur:30, patient:"Camille Rocha",   th:"amelia", loc:"Soho",    type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 5 of 12"},
+  {id:"e13", day:"Fri", start:mins(13,0), dur:30, patient:"Bea Lindqvist",   th:"amelia", loc:"Soho",    type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 3 of 12"},
+  {id:"e14", day:"Fri", start:mins(12,0), dur:30, patient:"Wesley Tan",      th:"kendo",  loc:"LIC",     type:"PT Follow-Up",       pkg:"PT Follow-Up (12), session 5 of 12"}
+];
+
+/* PTO blocks to render on the calendar (informational bands). */
+var PTO_BLOCKS = [
+  {day:"Thu", loc:"LIC", th:"hannah", label:"Hannah Cole: Out (PTO)"},
+  {day:"Fri", loc:"LIC", th:"hannah", label:"Hannah Cole: Out (PTO)"}
+];
+
+/* Patient roster with continuity status. next = null means no upcoming appointment. */
+var PATIENTS = [
+  {name:"Ava Coleman",    loc:"Midtown", plan:"PT Follow-Up (12)",  used:8,  total:12, last:"July 15, 2026", lastStatus:"Completed", next:"Mon July 20, 8:00 AM",
+    hist:[["July 15","Completed"],["July 10","Completed"],["July 8","Completed"]]},
+  {name:"Ethan Brooks",   loc:"Midtown", plan:"PT Follow-Up (12)",  used:7,  total:12, last:"July 16, 2026", lastStatus:"Completed", next:"Mon July 20, 9:00 AM",
+    hist:[["July 16","Completed"],["July 14","Completed"],["July 9","Completed"]]},
+  {name:"Maria Santos",   loc:"Midtown", plan:"Post-Op Rehab (20)", used:8,  total:20, last:"July 16, 2026", lastStatus:"Completed", next:"Mon July 20, 10:00 AM",
+    hist:[["July 16","Completed"],["July 14","Completed"],["July 10","Completed"]]},
+  {name:"James Ford",     loc:"Midtown", plan:"PT Follow-Up (12)",  used:2,  total:12, last:"July 14, 2026", lastStatus:"Completed", next:"Mon July 20, 11:00 AM",
+    hist:[["July 14","Completed"],["July 10","Completed"]]},
+  {name:"Thomas Reyes",   loc:"Midtown", plan:"Post-Op Rehab (20)", used:6,  total:20, last:"July 6, 2026", lastStatus:"Completed", next:null,
+    hist:[["July 6","Completed"],["July 2","Completed"],["June 29","Completed"]]},
+  {name:"Frank Delgado",  loc:"Midtown", plan:"PT Follow-Up (12)",  used:6,  total:12, last:"July 10, 2026", lastStatus:"Completed", next:null,
+    hist:[["July 10","Completed"],["July 7","Completed"],["July 3","Completed"]]},
+  {name:"Daniel Cho",     loc:"Soho",    plan:"Post-Op Rehab (20)", used:11, total:20, last:"July 17, 2026", lastStatus:"Completed", next:"Mon July 20, 8:30 AM",
+    hist:[["July 17","Completed"],["July 15","Completed"],["July 13","Completed"]]},
+  {name:"Rachel Green",   loc:"Soho",    plan:"PT Follow-Up (12)",  used:3,  total:12, last:"July 16, 2026", lastStatus:"Completed", next:"Mon July 20, 10:00 AM",
+    hist:[["July 16","Completed"],["July 13","Completed"]]},
+  {name:"Peter Novak",    loc:"Soho",    plan:"PT Follow-Up (12)",  used:1,  total:12, last:"July 15, 2026", lastStatus:"Completed", next:"Mon July 20, 1:00 PM",
+    hist:[["July 15","Completed"]]},
+  {name:"Hana Yoshida",   loc:"Soho",    plan:"PT Follow-Up (12)",  used:0,  total:12, last:"", lastStatus:"", next:"Tue July 21, 3:00 PM (Eval)",
+    hist:[]},
+  {name:"Sandra Willis",  loc:"Soho",    plan:"Post-Op Rehab (20)", used:5,  total:20, last:"July 16, 2026", lastStatus:"Completed", next:"Wed July 22, 2:00 PM",
+    hist:[["July 16","Completed"],["July 14","Completed"]]},
+  {name:"Olivia Grant",   loc:"Soho",    plan:"PT Follow-Up (12)",  used:11, total:12, last:"July 15, 2026", lastStatus:"Completed", next:null,
+    hist:[["July 15","Completed"],["July 13","Completed"],["July 8","Completed"]]},
+  {name:"Leo Martin",     loc:"LIC",     plan:"PT Follow-Up (12)",  used:6,  total:12, last:"July 16, 2026", lastStatus:"Completed", next:"Mon July 20, 9:30 AM",
+    hist:[["July 16","Completed"],["July 14","Completed"]]},
+  {name:"Grace Kim",      loc:"LIC",     plan:"PT Follow-Up (12)",  used:5,  total:12, last:"July 16, 2026", lastStatus:"Completed", next:"Mon July 20, 11:00 AM",
+    hist:[["July 16","Completed"],["July 13","Completed"]]},
+  {name:"Omar Haddad",    loc:"LIC",     plan:"PT Follow-Up (12)",  used:3,  total:12, last:"July 15, 2026", lastStatus:"Completed", next:"Tue July 21, 2:00 PM",
+    hist:[["July 15","Completed"],["July 10","Completed"]]},
+  {name:"Nina Patel",     loc:"LIC",     plan:"PT Follow-Up (12)",  used:4,  total:12, last:"July 16, 2026", lastStatus:"No-Show", next:null,
+    hist:[["July 16","No-Show"],["July 13","Completed"],["July 9","Completed"]]},
+  {name:"Grace Lin",      loc:"Midtown", plan:"PT Follow-Up (12)",  used:4,  total:12, last:"July 14, 2026", lastStatus:"Completed", next:"Tue July 21, 10:00 AM",
+    hist:[["July 14","Completed"],["July 10","Completed"]]},
+  {name:"Robert Ellison", loc:"Midtown", plan:"PT Follow-Up (12)",  used:6,  total:12, last:"July 15, 2026", lastStatus:"Completed", next:"Tue July 21, 10:00 AM",
+    hist:[["July 15","Completed"],["July 12","Completed"]]},
+  {name:"Sofia Marino",   loc:"LIC",     plan:"New patient (eval pending)", used:0,  total:0,  last:"", lastStatus:"", next:"Mon July 20, 9:00 AM (Eval)",
+    hist:[]},
+  {name:"Nathan Powell",  loc:"Midtown", plan:"New patient (eval pending)", used:0,  total:0,  last:"", lastStatus:"", next:"Thu July 23, 11:00 AM (Eval)",
+    hist:[]},
+  {name:"Julian Meyer",   loc:"Soho",    plan:"Post-Op Rehab (20)", used:4,  total:20, last:"July 17, 2026", lastStatus:"Completed", next:"Wed July 22, 12:00 PM",
+    hist:[["July 17","Completed"],["July 15","Completed"],["July 11","Completed"]]},
+  {name:"Camille Rocha",  loc:"Soho",    plan:"PT Follow-Up (12)",  used:3,  total:12, last:"July 16, 2026", lastStatus:"Completed", next:"Wed July 22, 1:00 PM",
+    hist:[["July 16","Completed"],["July 12","Completed"]]},
+  {name:"Bea Lindqvist",  loc:"Soho",    plan:"PT Follow-Up (12)",  used:2,  total:12, last:"July 15, 2026", lastStatus:"Completed", next:"Fri July 24, 1:00 PM",
+    hist:[["July 15","Completed"],["July 10","Completed"]]},
+  {name:"Wesley Tan",     loc:"LIC",     plan:"PT Follow-Up (12)",  used:4,  total:12, last:"July 16, 2026", lastStatus:"Completed", next:"Fri July 24, 12:00 PM",
+    hist:[["July 16","Completed"],["July 13","Completed"]]}
+];
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+var currentLoc = "All";
+var currentTh = "All";
+
+function fmtTime(m){
+  var h = Math.floor(m/60), mm = m%60;
+  var ap = h>=12 ? "PM":"AM";
+  var hh = h%12; if(hh===0) hh=12;
+  return hh + ":" + (mm<10?"0"+mm:mm) + " " + ap;
+}
+function fmtRange(start,dur){ return fmtTime(start) + " to " + fmtTime(start+dur); }
+
+function renderCalendar(){
+  var grid = document.getElementById("calGrid");
+  grid.innerHTML = "";
+  DAYS.forEach(function(d){
+    var col = document.createElement("div");
+    col.className = "day";
+    col.innerHTML = '<h3>'+d.label+' <span class="date">'+d.date+'</span></h3>';
+    var slots = document.createElement("div");
+    slots.className = "slots";
+
+    var list = APPTS.filter(function(a){
+      return a.day===d.key && (currentLoc==="All" || a.loc===currentLoc) && (currentTh==="All" || a.th===currentTh);
+    }).sort(function(x,y){ return x.start - y.start || THMAP[x.th].name.localeCompare(THMAP[y.th].name); });
+
+    /* PTO bands: shown only when a specific location is selected, not in the All view */
+    var ptos = (currentLoc==="All") ? [] : PTO_BLOCKS.filter(function(p){
+      return p.day===d.key && p.loc===currentLoc;
+    });
+    ptos.forEach(function(p){
+      var band = document.createElement("div");
+      band.className = "pto";
+      band.textContent = p.label;
+      slots.appendChild(band);
+    });
+
+    if(list.length===0 && ptos.length===0){
+      var e = document.createElement("div");
+      e.className = "empty-day";
+      e.textContent = "No appointments";
+      slots.appendChild(e);
+    }
+
+    list.forEach(function(a){
+      var th = THMAP[a.th];
+      var card = document.createElement("div");
+      card.className = "appt loc-"+a.loc;
+      card.tabIndex = 0;
+      card.innerHTML =
+        '<div class="t">'+fmtRange(a.start,a.dur)+'</div>'+
+        '<div class="p">'+a.patient+'</div>'+
+        '<div class="meta"><span>'+th.name+'</span><span class="tag">'+a.loc+'</span></div>';
+      card.addEventListener("click", function(){ openAppt(a); });
+      card.addEventListener("keydown", function(ev){ if(ev.key==="Enter"||ev.key===" "){ ev.preventDefault(); openAppt(a);} });
+      slots.appendChild(card);
+    });
+
+    col.appendChild(slots);
+    grid.appendChild(col);
+  });
+}
+
+function renderPatients(){
+  var tb = document.getElementById("patientRows");
+  tb.innerHTML = "";
+  var list = PATIENTS.filter(function(p){ return currentLoc==="All" || p.loc===currentLoc; });
+  list.forEach(function(p){
+    var tr = document.createElement("tr");
+    var sess = p.total>0 ? (p.used+" / "+p.total) : "-";
+    var lastCell = p.last==="" ? '<span class="none">-</span>'
+      : '<span class="status-dot st-'+(p.lastStatus||"Completed").replace(" ","-")+'"></span>'+p.last
+        + (p.lastStatus && p.lastStatus!=="Completed" ? ' <span class="faint">('+p.lastStatus+')</span>' : '');
+    var nextCell = p.next ? p.next : '<span class="none">None scheduled</span>';
+    tr.innerHTML =
+      '<td class="pname">'+p.name+'</td>'+
+      '<td><span class="tag" style="background:'+locBg(p.loc)+';color:'+locFg(p.loc)+'">'+p.loc+'</span></td>'+
+      '<td class="muted">'+p.plan+'</td>'+
+      '<td class="sess">'+sess+'</td>'+
+      '<td class="muted">'+lastCell+'</td>'+
+      '<td class="muted">'+nextCell+'</td>';
+    tr.addEventListener("click", function(){ openPatient(p); });
+    tb.appendChild(tr);
+  });
+}
+
+function locBg(l){ return l==="Midtown"?"#e9f1fa":l==="Soho"?"#e6f5f2":"#faf1e0"; }
+function locFg(l){ return l==="Midtown"?"#2f6fb0":l==="Soho"?"#1f8a80":"#b6791f"; }
+
+function renderRoster(){
+  var g = document.getElementById("rosterGrid");
+  g.innerHTML = "";
+  THERAPISTS.forEach(function(t){
+    var initials = t.name.split(" ").map(function(x){return x[0];}).join("").slice(0,2);
+    var card = document.createElement("div");
+    card.className = "rcard";
+    card.innerHTML =
+      '<div class="rhead"><div class="rav" style="background:'+t.color+'">'+initials+'</div>'+
+        '<div><div class="rname">'+t.name+'</div><div class="rrole">Physical Therapist</div></div></div>'+
+      '<div class="rrow"><span class="k">Employment</span><span class="v">'+t.status+'</span></div>'+
+      '<div class="rrow"><span class="k">Working days</span><span class="v">'+t.days+'</span></div>'+
+      '<div class="rrow"><span class="k">Time off this week</span><span class="v '+(t.pto?"pto":"")+'">'+(t.pto?t.pto:"None")+'</span></div>';
+    g.appendChild(card);
+  });
+}
+
+/* ---------- modals ---------- */
+var overlay = document.getElementById("overlay");
+function openModal(title, html){
+  document.getElementById("mTitle").textContent = title;
+  document.getElementById("mBody").innerHTML = html;
+  overlay.classList.add("open");
+}
+function closeModal(){ overlay.classList.remove("open"); }
+document.getElementById("mClose").addEventListener("click", closeModal);
+overlay.addEventListener("click", function(e){ if(e.target===overlay) closeModal(); });
+document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModal(); });
+
+function drow(k,v){ return '<div class="drow"><span class="k">'+k+'</span><span class="v">'+v+'</span></div>'; }
+
+function openAppt(a){
+  var th = THMAP[a.th];
+  var html =
+    drow("Date", DAYS.filter(function(d){return d.key===a.day;})[0].label+", "+DAYS.filter(function(d){return d.key===a.day;})[0].date+", 2026")+
+    drow("Time", fmtRange(a.start,a.dur)+" ("+a.dur+" min)")+
+    drow("Patient", a.patient)+
+    drow("Provider", th.name)+
+    drow("Location", a.loc)+
+    drow("Appointment type", a.type)+
+    drow("Package", a.pkg)+
+    drow("Status", "Scheduled");
+  openModal(a.patient+" · "+a.type, html);
+}
+
+function openPatient(p){
+  var sess = p.total>0 ? (p.used+" of "+p.total+" sessions used") : "No active package";
+  var html =
+    drow("Location", p.loc)+
+    drow("Plan of care", p.plan)+
+    drow("Package usage", sess)+
+    drow("Last visit", p.last==="" ? "None on record" : p.last + (p.lastStatus?" ("+p.lastStatus+")":""))+
+    drow("Next appointment", p.next ? p.next : "None scheduled");
+  if(p.hist && p.hist.length){
+    html += '<h4>Recent visits</h4><div class="hist">';
+    p.hist.forEach(function(h){ html += '<div class="h"><span>'+h[0]+', 2026</span><span class="faint">'+h[1]+'</span></div>'; });
+    html += '</div>';
+  }
+  openModal(p.name, html);
+}
+
+/* ---------- tabs & filters ---------- */
+document.querySelectorAll(".tabbtn").forEach(function(b){
+  b.addEventListener("click", function(){
+    document.querySelectorAll(".tabbtn").forEach(function(x){x.classList.remove("active");});
+    b.classList.add("active");
+    var v = b.getAttribute("data-view");
+    document.querySelectorAll(".view").forEach(function(x){x.classList.remove("active");});
+    document.getElementById("view-"+v).classList.add("active");
+    /* filter visibility per tab */
+    var locF = document.getElementById("filters");
+    var thF  = document.getElementById("thfilters");
+    var leg  = document.querySelector(".legend");
+    if(v==="calendar"){ locF.style.display="flex"; thF.style.display="flex"; if(leg) leg.style.display=""; }
+    else if(v==="patients"){ locF.style.display="flex"; thF.style.display="none"; if(leg) leg.style.display=""; }
+    else { locF.style.display="none"; thF.style.display="none"; if(leg) leg.style.display="none"; }
+  });
+});
+document.querySelectorAll("#filters button").forEach(function(b){
+  b.addEventListener("click", function(){
+    document.querySelectorAll("#filters button").forEach(function(x){x.classList.remove("active");});
+    b.classList.add("active");
+    currentLoc = b.getAttribute("data-loc");
+    renderCalendar();
+    renderPatients();
+  });
+});
+document.querySelectorAll("#thfilters button").forEach(function(b){
+  b.addEventListener("click", function(){
+    document.querySelectorAll("#thfilters button").forEach(function(x){x.classList.remove("active");});
+    b.classList.add("active");
+    currentTh = b.getAttribute("data-th");
+    renderCalendar();
+  });
+});
+
+/* ---------- init ---------- */
+renderCalendar();
+renderPatients();
+renderRoster();
+</script>
+</body>
+</html>
